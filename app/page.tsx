@@ -1,9 +1,20 @@
-import LiveKPIRow from "@/components/LiveKPIRow";
 import LiveClock from "@/components/LiveClock";
-import MachineChart from "@/components/MachineChart";
+import RealtimeDashboard from "@/components/RealtimeDashboard";
 import InventoryTable from "@/components/InventoryTable";
 import DefectsPanel from "@/components/DefectsPanel";
-import AlertsPanel from "@/components/AlertsPanel";
+import { kpiData, machineData, inventoryData, defectData, alertsData } from "@/data/mockData";
+import type { DashboardData } from "@/lib/types";
+
+// Static snapshot used for SSR and as the initial WS fallback value.
+// The WebSocket connection replaces this with live data immediately on mount.
+const INITIAL_DATA: DashboardData = {
+  kpis: kpiData,
+  machines: machineData,
+  inventory: inventoryData,
+  defects: defectData,
+  alerts: alertsData,
+  fetchedAt: "",
+};
 
 export default function Home() {
   return (
@@ -12,7 +23,7 @@ export default function Home() {
       style={{ backgroundColor: "#0f1117", color: "#f8fafc" }}
     >
       {/* Header */}
-      <header className="flex items-center justify-between mb-6">
+      <header className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-white">
             Fertigungsdashboard
@@ -24,20 +35,10 @@ export default function Home() {
         <LiveClock />
       </header>
 
-      {/* KPI Row — live updates every 5 s */}
-      <LiveKPIRow />
+      {/* Live sections: connection status + KPIs + machine chart + alerts */}
+      <RealtimeDashboard initialData={INITIAL_DATA} />
 
-      {/* Middle Row: Machine chart + Alerts */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <div className="lg:col-span-2">
-          <MachineChart />
-        </div>
-        <div>
-          <AlertsPanel />
-        </div>
-      </section>
-
-      {/* Bottom Row: Inventory table + Defects */}
+      {/* Static panels */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <InventoryTable />

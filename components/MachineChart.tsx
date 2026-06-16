@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { machineData } from "@/data/mockData";
+import type { MachineItem } from "@/lib/types";
 
 function getBarColor(value: number): string {
   if (value > 80) return "#22c55e";
@@ -17,7 +18,7 @@ function getBarColor(value: number): string {
   return "#ef4444";
 }
 
-export default function MachineChart() {
+export default function MachineChart({ machines = machineData }: { machines?: MachineItem[] }) {
   return (
     <div
       className="rounded-xl p-5 border flex flex-col gap-4"
@@ -45,7 +46,7 @@ export default function MachineChart() {
 
       <ResponsiveContainer width="100%" height={220}>
         <BarChart
-          data={machineData}
+          data={machines}
           layout="vertical"
           margin={{ top: 0, right: 40, left: 10, bottom: 0 }}
         >
@@ -77,7 +78,7 @@ export default function MachineChart() {
             formatter={(value: number) => [`${value}%`, "Auslastung"]}
           />
           <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={22}>
-            {machineData.map((entry) => (
+            {machines.map((entry) => (
               <Cell key={entry.name} fill={getBarColor(entry.value)} />
             ))}
           </Bar>
