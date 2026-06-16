@@ -1,76 +1,56 @@
 "use client";
 
-import { useState } from "react";
-import { useInterval } from "@/hooks/useInterval";
+import useSWR from "swr";
 import KPICard from "@/components/KPICard";
+import { kpiData } from "@/data/mockData";
+import type { DashboardData } from "@/lib/types";
 
-const BASE = {
-  oee: 81,
-  ausbringung: 1247,
-  ausfallzeit: 38,
-  ausschussquote: 1.8,
+const fetcher = (url: string): Promise<DashboardData> =>
+  fetch(url).then((r) => {
+    if (!r.ok) throw new Error(`API ${r.status}`);
+    return r.json();
+  });
+
+// Static mock data used as the instant fallback on first render
+// so the page never shows a loading skeleton on initial paint.
+const FALLBACK: DashboardData = {
+  kpis: kpiData,
+  machines: [],
+  inventory: [],
+  defects: [],
+  alerts: [],
+  fetchedAt: "",
 };
 
-function jitter(min: number, max: number) {
-  return Math.random() * (max - min) + min;
-}
-
-function clamp(val: number, lo: number, hi: number) {
-  return Math.min(hi, Math.max(lo, val));
-}
-
 export default function LiveKPIRow() {
-  const [oee, setOee] = useState(BASE.oee);
-  const [ausbringung, setAusbringung] = useState(BASE.ausbringung);
-  const [ausfallzeit, setAusfallzeit] = useState(BASE.ausfallzeit);
-  const [ausschussquote, setAusschussquote] = useState(BASE.ausschussquote);
+  const { data, error } = useSWR<DashboardData>(
+    "/api/dashboard",
+    fetcher,
+    {
+      refreshInterval: 5000,
+      fallbackData: FALLBACK,
+      // Don't revalidate on window focus — avoids a burst of requests
+      // when a user tabs back to the dashboard.
+      revalidateOnFocus: false,
+    }
+  );
 
-  useInterval(() => {
-    setOee((v) => +clamp(v + jitter(-2, 2), 50, 99).toFixed(1));
-    setAusbringung((v) =>
-      Math.round(clamp(v + jitter(-10, 10), 900, 1300))
+  if (error) {
+    return (
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div
+          className="col-span-4 rounded-xl px-5 py-4 text-sm text-red-400 border"
+          style={{ backgroundColor: "#1a1f2e", borderColor: "#2d3748" }}
+        >
+          API nicht erreichbar — Daten werden nicht aktualisiert.
+        </div>
+      </section>
     );
-    setAusfallzeit((v) =>
-      Math.round(clamp(v + jitter(-5, 5), 0, 180))
-    );
-    setAusschussquote((v) =>
-      +clamp(v + jitter(-0.2, 0.2), 0, 10).toFixed(1)
-    );
-  }, 5000);
-
-  const pctDelta = (current: number, base: number) =>
-    +((current - base) / base * 100).toFixed(1);
-
-  const kpis = [
-    {
-      label: "OEE",
-      value: `${oee.toFixed(1)}%`,
-      sub: "Gesamtanlageneffektivität",
-      trend: +(oee - BASE.oee).toFixed(1),
-    },
-    {
-      label: "Ausbringung",
-      value: ausbringung.toLocaleString("de-DE"),
-      sub: "Ziel: 1.300 Teile",
-      trend: pctDelta(ausbringung, BASE.ausbringung),
-    },
-    {
-      label: "Ausfallzeit",
-      value: `${ausfallzeit} min`,
-      sub: "Ungeplante Stillstände",
-      trend: pctDelta(ausfallzeit, BASE.ausfallzeit),
-    },
-    {
-      label: "Ausschussquote",
-      value: `${ausschussquote.toFixed(1).replace(".", ",")}%`,
-      sub: `Qualitätsrate ${(100 - ausschussquote).toFixed(1).replace(".", ",")}%`,
-      trend: +(ausschussquote - BASE.ausschussquote).toFixed(1),
-    },
-  ];
+  }
 
   return (
     <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {kpis.map((kpi) => (
+      {data!.kpis.map((kpi) => (
         <KPICard key={kpi.label} {...kpi} />
       ))}
     </section>
