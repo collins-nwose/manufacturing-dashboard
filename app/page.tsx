@@ -1,9 +1,9 @@
-import KPICard from "@/components/KPICard";
+import LiveKPIRow from "@/components/LiveKPIRow";
+import LiveClock from "@/components/LiveClock";
 import MachineChart from "@/components/MachineChart";
 import InventoryTable from "@/components/InventoryTable";
 import DefectsPanel from "@/components/DefectsPanel";
 import AlertsPanel from "@/components/AlertsPanel";
-import { kpiData } from "@/data/mockData";
 
 export default function Home() {
   return (
@@ -21,24 +21,11 @@ export default function Home() {
             Teilefertigung · Industrie 4.0 · Werk München-Süd
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-xs font-mono text-slate-400">Schicht B</p>
-          <p className="text-xs text-slate-500">16.06.2026 · 10:35 Uhr</p>
-        </div>
+        <LiveClock />
       </header>
 
-      {/* KPI Row */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {kpiData.map((kpi) => (
-          <KPICard
-            key={kpi.label}
-            label={kpi.label}
-            value={kpi.value}
-            sub={kpi.sub}
-            trend={kpi.trend}
-          />
-        ))}
-      </section>
+      {/* KPI Row — live updates every 5 s */}
+      <LiveKPIRow />
 
       {/* Middle Row: Machine chart + Alerts */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
