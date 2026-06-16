@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Set-Location \"C:\\\\Users\\\\Colli\\\\manufacturing-dashboard\"; Start-Process -FilePath \"npm\" -ArgumentList \"run\",\"dev\" -NoNewWindow -PassThru | Select-Object Id | ForEach-Object { $_.Id | Out-File \"$env:TEMP\\\\mfg-dev.pid\" -Encoding utf8 }; Write-Host \"Dev server starting...\")"
+    ]
+  }
+}
