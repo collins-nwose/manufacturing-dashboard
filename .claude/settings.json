@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Set-Location \"C:\\\\Users\\\\Colli\\\\manufacturing-dashboard\"; Start-Process -FilePath \"npm\" -ArgumentList \"run\",\"dev\" -NoNewWindow -PassThru | Select-Object Id | ForEach-Object { $_.Id | Out-File \"$env:TEMP\\\\mfg-dev.pid\" -Encoding utf8 }; Write-Host \"Dev server starting...\")"
+      "PowerShell(Set-Location \"C:\\\\Users\\\\Colli\\\\manufacturing-dashboard\"; Start-Process -FilePath \"npm\" -ArgumentList \"run\",\"dev\" -NoNewWindow -PassThru | Select-Object Id | ForEach-Object { $_.Id | Out-File \"$env:TEMP\\\\mfg-dev.pid\" -Encoding utf8 }; Write-Host \"Dev server starting...\")",
+      "PowerShell($npmPath = \\(Get-Command npm\\).Source; Write-Host \"npm path: $npmPath\")",
+      "PowerShell(Set-Location \"C:\\\\Users\\\\Colli\\\\manufacturing-dashboard\"; Start-Process -FilePath \"powershell.exe\" -ArgumentList \"-NoProfile\",\"-Command\",\"npm run dev\" -WorkingDirectory \"C:\\\\Users\\\\Colli\\\\manufacturing-dashboard\" -PassThru | Select-Object -ExpandProperty Id | Out-File \"$env:TEMP\\\\mfg-dev.pid\" -Encoding utf8; Write-Host \"Dev server process started\")",
+      "PowerShell($timeout = 60; $elapsed = 0; do { Start-Sleep -Seconds 2; $elapsed += 2; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 3 -ErrorAction Stop; Write-Host \"Server up after ${elapsed}s — status $\\($r.StatusCode\\)\"; break } catch { Write-Host \"Waiting... ${elapsed}s\" } } while \\($elapsed -lt $timeout\\); if \\($elapsed -ge $timeout\\) { Write-Host \"TIMEOUT: server never responded\" })"
     ]
   }
 }
